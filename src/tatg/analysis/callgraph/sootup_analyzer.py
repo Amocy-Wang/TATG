@@ -636,3 +636,5 @@ def preflight_sootup_analyzer(
                 f"SootUp smoke test ran but output is incomplete — missing: {', '.join(missing)}. "
                 f"Raw output ({len(raw)} chars): {raw[:300]}"
             )
+
+    return result

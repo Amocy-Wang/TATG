@@ -306,10 +306,22 @@ QuasarGen checkout:
 
 ## Known limitations
 
-- The SootUp helper in `tools/external/sootup-callgraph-pathfinder` depends on
-  `sootup 2.0.0-SNAPSHOT`, which is not on Maven Central. Install SootUp from
-  source (`mvn install`) before running `mvn package` there, then set
-  `SOOTUP_CG_JAR`. Without it, TATG falls back to source-level analysis.
+- SootUp call-graph analysis is optional. Without a JAR, TATG falls back to
+  source-level analysis. To enable it, build the bundled helper (it uses
+  SootUp 3.0.1 from Maven Central) and point TATG at the JAR:
+
+  ```bash
+  (cd tools/external/sootup-callgraph-pathfinder && mvn -q package)
+  export SOOTUP_CG_JAR=$PWD/tools/external/sootup-callgraph-pathfinder/target/sootup-callgraph-pathfinder.jar
+  # or pass --sootup-jar <jar> to `tatg generate`
+  ```
+
+  Before generation, TATG runs a SootUp smoke test with a 45 s limit. The
+  helper builds a class-hierarchy call graph that includes the JDK runtime, so
+  on a slow machine the smoke test can take longer than that. On a 4-core
+  cloud container it took about 80 s. When the smoke test times out,
+  `--sootup-jar` aborts the run, while `SOOTUP_CG_JAR` only prints a warning
+  and continues.
 - Generation quality depends on the model. It must follow strict JSON schemas
   and handle long prompts: branch-analysis prompts reach about 60 KB.
 - Some `--cat-engine-root` and `--method-engine-root` flags are inherited

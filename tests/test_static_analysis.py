@@ -693,3 +693,68 @@ class TestEnrichmentAdjacentFile:
         source = tmp_path / "Foo.java"
         source.touch()
         assert _probe_adjacent_cg_file(source, "Foo", "bar") == ""
+
+
+# ---------------------------------------------------------------------------
+# SootUp preflight: result dict is returned once the smoke test has run
+# ---------------------------------------------------------------------------
+
+_SMOKE_OUTPUT_WITH_PATHS_AND_INITS = textwrap.dedent(
+    """\
+    ## Max Depth Paths
+    Path:
+      QSmokeTarget#setup(): int (public)
+      QSmokeTarget#compute(): int (private)
+    ---
+
+    ## All Initializations
+      QSmokeTarget (public):
+        QSmokeTarget(int) (public)
+    """
+)
+
+
+class TestSootUpPreflightResult:
+    @pytest.fixture()
+    def fake_tools(self, monkeypatch, tmp_path):
+        from types import SimpleNamespace
+
+        import tatg.analysis.callgraph.sootup_analyzer as sootup_analyzer
+
+        jar = tmp_path / "sootup-callgraph-pathfinder.jar"
+        jar.write_bytes(b"jar")
+        smoke_stdout = {"value": _SMOKE_OUTPUT_WITH_PATHS_AND_INITS}
+
+        def _fake_run(argv, **kwargs):
+            if "-version" in argv:
+                return SimpleNamespace(returncode=0, stdout="", stderr='openjdk version "21"')
+            if "-jar" in argv:
+                return SimpleNamespace(returncode=0, stdout=smoke_stdout["value"], stderr="")
+            return SimpleNamespace(returncode=0, stdout="", stderr="")
+
+        monkeypatch.setattr(sootup_analyzer.subprocess, "run", _fake_run)
+        return jar, smoke_stdout
+
+    def test_successful_smoke_test_returns_ok_result(self, fake_tools):
+        from tatg.analysis.callgraph.sootup_analyzer import preflight_sootup_analyzer
+
+        jar, _ = fake_tools
+        result = preflight_sootup_analyzer(jar_path=jar)
+
+        assert result is not None
+        assert result["ok"] is True
+        assert result["smoke_test_ran"] is True
+        assert result["smoke_paths_found"] == 1
+        assert result["smoke_inits_found"] == 1
+        assert result["error"] is None
+
+    def test_incomplete_smoke_output_returns_error_result(self, fake_tools):
+        from tatg.analysis.callgraph.sootup_analyzer import preflight_sootup_analyzer
+
+        jar, smoke_stdout = fake_tools
+        smoke_stdout["value"] = _SMOKE_OUTPUT_WITH_PATHS_AND_INITS.split("## All Initializations")[0]
+        result = preflight_sootup_analyzer(jar_path=jar)
+
+        assert result is not None
+        assert result["ok"] is False
+        assert "constructor initializations" in result["error"]
