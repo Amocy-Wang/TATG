@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tatg"
+version = "0.1.0"
+description = "TATG: target-aware LLM test generation for Java, with a validation/repair/coverage/mutation harness"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+  { name = "Anonymous Artifact Authors" }
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+]
+
+[project.scripts]
+tatg = "tatg.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

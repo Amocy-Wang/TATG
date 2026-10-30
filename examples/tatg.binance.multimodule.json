@@ -1,0 +1,36 @@
+{
+  "generate": {
+    "backend": "tatg",
+    "scope": "multimodule",
+    "project_root": "/path/to/binance-connector-java/clients",
+    "filter_modules": [
+      "common",
+      "spot"
+    ],
+    "filter_classes": [
+      "HmacSignatureGenerator",
+      "SignatureConfiguration"
+    ],
+    "test_command": [
+      "mvn -pl common test -DfailIfNoTests=false -q",
+      "mvn -pl spot test -DfailIfNoTests=false -q"
+    ],
+    "test_command_map": {
+      "common": [
+        "mvn -pl common test -DfailIfNoTests=false -q"
+      ],
+      "spot": [
+        "mvn -pl spot test -DfailIfNoTests=false -q"
+      ]
+    },
+    "parallel_targets": 2,
+    "repair_mode": "class",
+    "max_iterations": 1,
+    "repair_iterations": 1,
+    "llm_timeout_seconds": 180,
+    "test_timeout_seconds": 900,
+    "model": "provider/model-name",
+    "api_base": "https://example.invalid/v1",
+    "api_key_env": "OPENAI_API_KEY"
+  }
+}
