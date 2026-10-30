@@ -307,14 +307,23 @@ QuasarGen checkout:
 ## Known limitations
 
 - SootUp call-graph analysis is optional. Without a JAR, TATG falls back to
-  source-level analysis. To enable it, build the bundled helper (it uses
-  SootUp 3.0.1 from Maven Central) and point TATG at the JAR:
+  source-level analysis. To enable it, build the bundled helper and point
+  TATG at the JAR. The helper uses the public SootUp 3.0.1 release from
+  [Maven Central](https://repo1.maven.org/maven2/org/soot-oss/sootup.core/3.0.1/)
+  (source: [soot-oss/SootUp](https://github.com/soot-oss/SootUp), tag
+  `v3.0.1`). It needs JDK 17 or newer and no locally installed SootUp:
 
   ```bash
   (cd tools/external/sootup-callgraph-pathfinder && mvn -q package)
   export SOOTUP_CG_JAR=$PWD/tools/external/sootup-callgraph-pathfinder/target/sootup-callgraph-pathfinder.jar
   # or pass --sootup-jar <jar> to `tatg generate`
   ```
+
+  The helper originally pinned an unpublished `2.0.0-SNAPSHOT` from SootUp's
+  develop branch. On `Lexer.nextToken`, `CSVFormat.printWithQuotes`, and
+  `HelpFormatter.renderOptions`, builds against the public 3.0.0 and 3.0.1
+  releases produce the same call paths, constructors, and factory methods.
+  Only the order of list entries differs.
 
   Before generation, TATG runs a SootUp smoke test with a 45 s limit. The
   helper builds a class-hierarchy call graph that includes the JDK runtime, so

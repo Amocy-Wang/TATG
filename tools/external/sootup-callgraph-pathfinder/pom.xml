@@ -8,6 +8,9 @@
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!-- Public release on Maven Central:
+         https://repo1.maven.org/maven2/org/soot-oss/sootup.core/3.0.1/
+         Source: https://github.com/soot-oss/SootUp (tag v3.0.1) -->
     <sootup.version>3.0.1</sootup.version>
   </properties>
   <dependencies>
